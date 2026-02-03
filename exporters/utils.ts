@@ -40,10 +40,10 @@ export async function downloadAsset(url: string, path: string, ctx: ExporterCont
 }
 
 /**
- * Recursively removes null values and empty objects/arrays from objects and arrays
+ * Recursively removes null values, empty strings, and empty objects/arrays
  */
 export function removeNullValues<T>(obj: T): T | null {
-    if (obj === null || obj === undefined) {
+    if (obj === null || obj === undefined || (typeof obj === "string" && obj === "")) {
         return null;
     }
 
