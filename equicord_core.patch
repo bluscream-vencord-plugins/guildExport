@@ -1,0 +1,18 @@
+diff --git a/src/api/Notices.tsx b/src/api/Notices.tsx
+index 5285ca148..8228ca728 100644
+--- a/src/api/Notices.tsx
++++ b/src/api/Notices.tsx
+@@ -39,11 +39,11 @@ export function nextNotice() {
+     }
+ }
+
+-export function showNotice(message: ReactNode, buttonText: string, onOkClick: () => void) {
++export function showNotice(message: ReactNode, buttonText: string, onOkClick: () => void, type = "GENERIC") {
+     const notice = isPrimitiveReactNode(message)
+         ? message
+         : <ErrorBoundary fallback={() => "Error Showing Notice"}>{message}</ErrorBoundary>;
+
+-    noticesQueue.push(["GENERIC", notice, buttonText, onOkClick]);
++    noticesQueue.push([type, notice, buttonText, onOkClick]);
+     if (!currentNotice) nextNotice();
+ }
