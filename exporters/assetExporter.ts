@@ -116,7 +116,7 @@ export const exportSounds: ExporterFunc = async ctx => {
         const name = ctx.filenameFormat === "Names" ? `${sanitize(soundName)}_${soundId}` : soundId;
 
         ctx.logger.info(`Downloading sound: ${soundName} (${soundId})`);
-        await downloadAsset(url, `sounds/${name}.mp3`, ctx);
+        await downloadAsset(url, `sounds/${name}.ogg`, ctx);
         if (ctx.actionDelay > 0) await sleep(ctx.actionDelay);
     }
 };

@@ -29,7 +29,9 @@ import { sanitize } from "./exporters/utils";
 import { ExportModal } from "./ExportModal";
 import { getNative } from "./nativeUtils";
 
-const logger = new Logger("GuildExport", "#7289da");
+const pluginId = "guildExport";
+const pluginName = "Guild Export";
+const logger = new Logger(pluginName, "#7289da");
 const EXPORT_NOTICE_BUTTON_TEXT = "Abort Export";
 
 export const settings = definePluginSettings({
@@ -219,20 +221,9 @@ async function exportGuildData(guildId: string) {
             if (s.exportMode === "ZipSend" && s.sendToChannelId) {
                 const file = new File([zipped as any], fileName, { type: "application/zip" });
                 try {
-                    // @ts-ignore
-                    const { CloudUploader } = await import("@webpack/common");
-                    if (CloudUploader) {
-                        CloudUploader.upload({
-                            channelId: s.sendToChannelId,
-                            file: { file, platform: 1 },
-                            draftType: 0
-                        });
-                    } else {
-                        // Fallback attempt with MessageActions if CloudUploader not found
-                        MessageActions.sendMessage(s.sendToChannelId, { content: "", invalidEmojis: [], validNonShortcutEmojis: [] }, null, {
-                            uploads: [{ file, platform: 1 }]
-                        });
-                    }
+                    MessageActions.sendMessage(s.sendToChannelId, { content: "", invalidEmojis: [], validNonShortcutEmojis: [] }, null, {
+                        uploads: [{ file, platform: 1 }]
+                    });
                 } catch (e) {
                     logger.error("Failed to send ZIP to channel", e);
                     showToast("Failed to send ZIP. Downloading instead.", Toasts.Type.FAILURE);
@@ -300,7 +291,7 @@ const GuildContextMenu: NavContextMenuPatchCallback = (children, { guild }) => {
 };
 
 export default definePlugin({
-    name: "GuildExport",
+    name: pluginName,
     description: "Export guild info, assets, and settings to a ZIP file.",
     authors: [
         { name: "Bluscream", id: 467777925790564352n },
