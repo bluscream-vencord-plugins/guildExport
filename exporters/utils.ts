@@ -1,4 +1,3 @@
-import { getNative } from "../nativeUtils";
 import { ExporterContext } from "./types";
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -7,19 +6,14 @@ export const sanitize = (name: string) => name.replace(/[<>:"/\\|?*]/g, "_");
 
 export async function downloadAsset(url: string, path: string, ctx: ExporterContext) {
     try {
-        const native = getNative();
         let uint8: Uint8Array | null = null;
 
-        if (native?.fetchAsset) {
-            uint8 = await native.fetchAsset(url);
+        const resp = await fetch(url);
+        if (resp.ok) {
+            uint8 = new Uint8Array(await resp.arrayBuffer());
         } else {
-            const resp = await fetch(url);
-            if (resp.ok) {
-                uint8 = new Uint8Array(await resp.arrayBuffer());
-            } else {
-                ctx.logger.error(`Failed to download asset: ${url} (Status: ${resp.status})`);
-                return;
-            }
+            ctx.logger.error(`Failed to download asset: ${url} (Status: ${resp.status})`);
+            return;
         }
 
         if (uint8) {

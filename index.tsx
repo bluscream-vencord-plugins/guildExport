@@ -23,7 +23,6 @@ import * as RoleEx from "./exporters/roleExporter";
 import { ExporterContext } from "./exporters/types";
 import { sanitize } from "./exporters/utils";
 import { ExportModal } from "./ExportModal";
-import { getNative } from "./nativeUtils";
 import { settings } from "./settings";
 // endregion Imports
 
@@ -91,23 +90,11 @@ async function exportGuildData(guildId: string) {
 
     try {
         const zipData: Record<string, Uint8Array> = {};
-        const native = getNative();
-        const exportToFolder = s.exportMode === "Folder" && native;
-
-        if (s.exportMode === "Folder" && !native) {
-            showToast("Direct folder export is not supported on Web. Falling back to ZIP.", Toasts.Type.MESSAGE);
-        }
-
         const save = async (path: string, data: string | Uint8Array | undefined) => {
             if (data === undefined) return;
             const uint8 = typeof data === "string" ? new TextEncoder().encode(data) : data;
-            if (exportToFolder) {
-                logger.info(`Saving to folder: ${path} (${uint8.length} bytes)`);
-                await native!.saveFile(s.exportDirectory, path, data);
-            } else {
-                logger.info(`Adding to ZIP: ${path} (${uint8.length} bytes)`);
-                zipData[path] = uint8;
-            }
+            logger.info(`Adding to ZIP: ${path} (${uint8.length} bytes)`);
+            zipData[path] = uint8;
         };
 
         const ctx: ExporterContext = {
@@ -130,29 +117,19 @@ async function exportGuildData(guildId: string) {
         if (s.exportStickers) await AssetEx.exportStickers(ctx);
         if (s.exportSounds) await AssetEx.exportSounds(ctx);
 
-        // Generate and download ZIP or finish Folder export
-        if (!exportToFolder) {
-            const zipped = zipSync(zipData);
-            const fileName = `${sanitize(guild.name)}_export.zip`;
+        // Generate and download ZIP
+        const zipped = zipSync(zipData);
+        const fileName = `${sanitize(guild.name)}_export.zip`;
 
-            if (s.exportMode === "ZipSend" && s.sendToChannelId) {
-                const file = new File([zipped as any], fileName, { type: "application/zip" });
-                try {
-                    MessageActions.sendMessage(s.sendToChannelId, { content: "", invalidEmojis: [], validNonShortcutEmojis: [] }, null, {
-                        uploads: [{ file, platform: 1 }]
-                    });
-                } catch (e) {
-                    logger.error("Failed to send ZIP to channel", e);
-                    showToast("Failed to send ZIP. Downloading instead.", Toasts.Type.FAILURE);
-                    const blob = new Blob([zipped as any], { type: "application/zip" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = fileName;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                }
-            } else {
+        if (s.exportMode === "ZipSend" && s.sendToChannelId) {
+            const file = new File([zipped as any], fileName, { type: "application/zip" });
+            try {
+                MessageActions.sendMessage(s.sendToChannelId, { content: "", invalidEmojis: [], validNonShortcutEmojis: [] }, null, {
+                    uploads: [{ file, platform: 1 }]
+                });
+            } catch (e) {
+                logger.error("Failed to send ZIP to channel", e);
+                showToast("Failed to send ZIP. Downloading instead.", Toasts.Type.FAILURE);
                 const blob = new Blob([zipped as any], { type: "application/zip" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
@@ -161,6 +138,14 @@ async function exportGuildData(guildId: string) {
                 a.click();
                 URL.revokeObjectURL(url);
             }
+        } else {
+            const blob = new Blob([zipped as any], { type: "application/zip" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         showToast(`Exported ${guild.name} successfully!`, Toasts.Type.SUCCESS);
@@ -212,7 +197,7 @@ const GuildContextMenu: NavContextMenuPatchCallback = (children, { guild }) => {
 
 // region Definition
 export default definePlugin({
-    name: "GuildExport",
+    name: pluginInfo.name,
     description: pluginInfo.description,
     authors: pluginInfo.authors,
     settings,

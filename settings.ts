@@ -2,17 +2,11 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 export const settings = definePluginSettings({
-    exportDirectory: {
-        type: OptionType.STRING,
-        description: "The directory where guild data will be exported",
-        default: "C:\\GuildExports",
-        restartNeeded: false,
-    },
+
     exportMode: {
         type: OptionType.SELECT,
         description: "The format in which to export the guild data",
         options: [
-            { label: "Folder", value: "Folder" },
             { label: "Zip (Save)", value: "ZipSave", default: true },
             { label: "Zip (Send)", value: "ZipSend" },
         ],
