@@ -19,7 +19,7 @@ import {
     TextInput
 } from "@webpack/common";
 
-import { settings } from "./index";
+import { settings } from "./settings";
 
 interface ExportModalProps {
     modalProps: ModalProps;

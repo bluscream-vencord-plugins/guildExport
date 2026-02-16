@@ -212,7 +212,7 @@ const GuildContextMenu: NavContextMenuPatchCallback = (children, { guild }) => {
 
 // region Definition
 export default definePlugin({
-    name: pluginInfo.name,
+    name: "GuildExport",
     description: pluginInfo.description,
     authors: pluginInfo.authors,
     settings,
