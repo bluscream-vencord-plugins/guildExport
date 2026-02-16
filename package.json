@@ -10,7 +10,7 @@
     "license": "GPL-3.0-or-later",
     "repository": {
         "type": "git",
-        "url": "https://github.com/bluscream-vencord-plugins/blu-guild-export.git"
+        "url": "https://github.com/bluscream-vencord-plugins/guildExport.git"
     },
     "vencord": {
         "plugin": true,

@@ -21,7 +21,12 @@ export const exportEmojis: ExporterFunc = async ctx => {
         }
     }
 
-    const emojiList = emojis || [];
+    const emojiList = (emojis || []).map(emoji => {
+        const ext = emoji.animated ? ".gif" : ".png";
+        const endpoint = window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT;
+        const url = `https:${endpoint}/emojis/${emoji.id}${ext}?size=512&quality=lossless`;
+        return { ...emoji, url };
+    });
     ctx.logger.info(`Found ${emojiList.length} emojis`);
     await ctx.save("emojis.json", JSON.stringify(removeNullValues(emojiList), null, 2));
 
@@ -55,7 +60,12 @@ export const exportStickers: ExporterFunc = async ctx => {
         }
     }
 
-    const stickerList = stickers || [];
+    const stickerList = (stickers || []).map(sticker => {
+        const formatType = sticker.format_type ?? (sticker as any).formatType;
+        const ext = formatType === 4 ? ".gif" : ".png";
+        const url = `https://cdn.discordapp.com/stickers/${sticker.id}${ext}`;
+        return { ...sticker, url };
+    });
     ctx.logger.info(`Found ${stickerList.length} stickers`);
     await ctx.save("stickers.json", JSON.stringify(removeNullValues(stickerList), null, 2));
 
@@ -95,8 +105,11 @@ export const exportSounds: ExporterFunc = async ctx => {
 
     const processedSounds = soundList.map(sound => {
         const { user, ...rest } = sound;
+        const soundId = rest.sound_id || rest.soundId;
+        const url = `https://cdn.discordapp.com/soundboard-sounds/${soundId}`;
         return {
             ...rest,
+            url,
             user_id: user?.id || rest.user_id || rest.userId
         };
     });
