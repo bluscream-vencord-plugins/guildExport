@@ -1,15 +1,17 @@
+//// Plugin originally written for Equicord at 2026-02-16 by https://github.com/Bluscream, https://antigravity.google
+// region Imports
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { popNotice, showNotice } from "@api/Notices";
-import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import {
     GuildStore,
     Menu,
     MessageActions,
     showToast,
-    Toasts } from "@webpack/common";
+    Toasts
+} from "@webpack/common";
 import { zipSync } from "fflate";
 
 import * as AssetEx from "./exporters/assetExporter";
@@ -22,112 +24,28 @@ import { ExporterContext } from "./exporters/types";
 import { sanitize } from "./exporters/utils";
 import { ExportModal } from "./ExportModal";
 import { getNative } from "./nativeUtils";
+import { settings } from "./settings";
+// endregion Imports
 
+// region PluginInfo
 export const pluginInfo = {
     id: "guildExport",
-    name: "Guild Export",
-    description: "Export guild structure and data",
-    color: "#7289da"
+    name: "GuildExport",
+    description: "Export guild structure and data including channels, roles, and members",
+    color: "#7289da",
+    authors: [
+        { name: "Bluscream", id: 467777925790564352n },
+        { name: "Assistant", id: 0n }
+    ],
 };
+// endregion PluginInfo
 
-const logger = new Logger(pluginInfo.name, pluginInfo.color);
+// region Variables
+const logger = new Logger(pluginInfo.id, pluginInfo.color);
 const EXPORT_NOTICE_BUTTON_TEXT = "Abort Export";
+// endregion Variables
 
-export const settings = definePluginSettings({
-    exportDirectory: {
-        type: OptionType.STRING,
-        description: "Export guild structure and data",
-        default: "C:\\GuildExports",
-        restartNeeded: false,
-    },
-    exportMode: {
-        type: OptionType.SELECT,
-        description: "Export guild structure and data",
-        options: [
-            { label: "Folder", value: "Folder" },
-            { label: "Zip (Save)", value: "ZipSave", default: true },
-            { label: "Zip (Send)", value: "ZipSend" },
-        ],
-        restartNeeded: false,
-    },
-    sendToChannelId: {
-        type: OptionType.STRING,
-        description: "Export guild structure and data",
-        default: "",
-        restartNeeded: false,
-    },
-    exportInfo: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportChannels: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportRoles: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportAutomod: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportBans: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportMembers: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportEmojis: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportStickers: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    exportSounds: {
-        type: OptionType.BOOLEAN,
-        description: "Export guild structure and data",
-        default: true,
-        restartNeeded: false,
-    },
-    filenameFormat: {
-        type: OptionType.SELECT,
-        description: "Export guild structure and data",
-        options: [
-            { label: "IDs (Unique, Safe)", value: "IDs", default: true },
-            { label: "Names (Sanitized)", value: "Names" },
-        ],
-        restartNeeded: false,
-    },
-    actionDelay: {
-        type: OptionType.SLIDER,
-        description: "Export guild structure and data",
-        markers: [0, 100, 250, 500, 1000, 2000],
-        default: 250,
-        restartNeeded: false,
-    },
-});
-
+// region Utils
 async function exportGuildData(guildId: string) {
     const guild = GuildStore.getGuild(guildId);
     if (!guild) {
@@ -276,7 +194,9 @@ async function exportGuildData(guildId: string) {
         );
     }
 }
+// endregion Utils
 
+// region Main
 const GuildContextMenu: NavContextMenuPatchCallback = (children, { guild }) => {
     if (!guild) return;
 
@@ -288,16 +208,16 @@ const GuildContextMenu: NavContextMenuPatchCallback = (children, { guild }) => {
         />
     );
 };
+// endregion Main
 
+// region Definition
 export default definePlugin({
-    name: "Guild Export",
-    description: "Export guild structure and data",
-    authors: [
-        { name: "Guild Export", id: 467777925790564352n },
-        { name: "Guild Export", id: 0n }
-    ],
+    name: pluginInfo.name,
+    description: pluginInfo.description,
+    authors: pluginInfo.authors,
     settings,
     contextMenus: {
         "guild-context": GuildContextMenu,
     }
 });
+// endregion Definition
